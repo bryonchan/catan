@@ -1,1 +1,4 @@
-index.js
+export const buildRoad = () => ({
+    type: 'BUILD',
+    item: 'Road'
+});
