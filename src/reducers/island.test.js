@@ -7,12 +7,13 @@ describe('Building slots, i.e. terrain hex edges and intersections', () => {
 	});
 
 	it('should initialise with a non empty collection', () => {
-		expect(initialState.length).toBeGreaterThan(0);
+		expect(initialState.constructor.name).toEqual('Object');
+		expect(initialState).not.toEqual({});
 	});
 	
 	it('should contain key', () => {
-		expect(initialState[0].key).toEqual(1);
-		expect(initialState[10].key).toEqual(11);	
+		expect(initialState["1"].key).toEqual("1");
+		expect(initialState["11"].key).toEqual("11");	
 	});
 });
 
@@ -46,7 +47,7 @@ describe('Terrain Hex reducers', () => {
 			let terrainHex1 = initialState[0];
 			expect(terrainHex1.slots[6].key).toEqual(24);	
 		});
-		
+
 	});
 	
 });
