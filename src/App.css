@@ -22,3 +22,183 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+.slot {
+  position: absolute;
+}
+
+.slot.path {
+  color: red;
+}
+
+.slot0 {
+  top: 0;
+  left: 0;
+}
+
+.slot1 {
+  top: 0px;
+  left: 20px;
+}
+
+.slot2 {
+  top: 0;
+  left: 40px;
+}
+
+.slot3 {
+  top: 0;
+  left: 60px;
+}
+
+.slot4 {
+  top: 0;
+  left: 80px;
+}
+
+.slot5 {
+  top: 40px;
+  left: 80px;
+}
+
+.slot6 {
+  top: 80px;
+  left: 80px;
+}
+
+.slot7 {
+  top: 80px;
+  left: 60px;
+}
+
+.slot8 {
+  top: 80px;
+  left: 40px;
+}
+
+.slot9 {
+  top: 80px;
+  left: 20px;
+}
+
+.slot10 {
+  top: 80px;
+  left: 0px;
+}
+
+.slot11 {
+  top: 40px;
+  left: 0px;
+}
+
+.hex {
+   position: absolute;
+   font-size: 0.65rem;
+}
+
+.hex0 {
+  top: 300px;
+  left: 250px;
+}
+
+.hex1{
+   top: 300px;
+  left: 400px;
+}
+
+.hex2{
+   top: 300px;
+  left: 550px;
+}
+
+.hex3{
+  top: 420px;
+  left: 180px;
+}
+
+.hex4{
+   top: 420px;
+  left: 330px;
+}
+
+.hex5{
+   top: 420px;
+  left: 480px;
+}
+
+.hex6{
+   top: 420px;
+  left: 630px;
+}
+
+.hex7{
+  top: 540px;
+  left: 100px;
+}
+
+.hex8{
+   top: 540px;
+  left: 250px;
+}
+
+.hex9{
+   top: 540px;
+  left: 400px;
+}
+
+.hex10{
+   top: 540px;
+  left: 550px;
+}
+
+.hex11{
+   top: 540px;
+  left: 700px;
+}
+
+.hex12{
+  top: 660px;
+  left: 180px;
+}
+
+.hex13{
+   top: 660px;
+  left: 330px;
+}
+
+.hex14{
+   top: 660px;
+  left: 480px;
+}
+
+.hex15{
+   top: 660px;
+  left: 630px;
+}
+
+.hex16 {
+  top: 780px;
+  left: 250px;
+}
+
+.hex17{
+   top: 780px;
+  left: 400px;
+}
+
+.hex18{
+   top: 780px;
+  left: 550px;
+}
+
+.player {
+  float: right;
+  clear: both;
+}
+
+.hex .number {
+  top: 40px;
+  left: 30px;
+  position: absolute;
+  color: blue;
+}
