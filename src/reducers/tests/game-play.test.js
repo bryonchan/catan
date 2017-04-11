@@ -1,4 +1,4 @@
-import catan, {endTurn} from ".";
+import catan, {endTurn} from "..";
 
 describe('Game Play', () => {
     describe('Player', () => {

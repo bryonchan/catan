@@ -19,7 +19,8 @@ class HelpMessage extends Component {
     			message += ` ${this.props.player} - Roll!`;
     			break;
             case "Trade":
-                message += ` ${this.props.player} - Trade!`;
+            case "Robber":
+                message += ` ${this.props.player} - ${this.props.stage.message}`;
                 break;
 			default:
 				message += null;

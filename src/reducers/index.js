@@ -1,4 +1,7 @@
 import _ from 'lodash';
+import {buyDevelopmentCard, initDevelopmentCards} from "./development-cards";
+import players from "./players";
+import terrainHex from "./terrain-hex";
 
 let _defaultSlots;
 
@@ -18,7 +21,7 @@ export const defaultState = {
     terrainHex: (function(){
     	const hexes = {};
     	for (let i = 0; i < 19; i++){
-    		hexes["terrain"+(i+1)] = {key: (i+1)+"", slots: []};
+    		hexes["terrain"+(i+1)] = {key: "terrain"+(i+1), slots: []};
     	}
     	// a - initial 
     	// rows
@@ -117,12 +120,14 @@ export const defaultState = {
     		players[playerName] = {
     			key: playerName,
     			roads: 15, 
+    			settlements: 5, 
+    			cities: 4, 
     			resourceCards: {
-	    			bricks: 2,
-	    			lumber: 2,
-	    			ore: 1,
-	    			grain: 1,
-	    			wool: 1
+	    			bricks: 5,
+	    			lumber: 5,
+	    			ore: 5,
+	    			grain: 5,
+	    			wool: 5
 	    		},
 	    		nextPlayer: (playerNames[i+1] ? playerNames[i+1] : playerNames[0] ),
 	    		prevPlayer: (playerNames[i-1] ? playerNames[i-1] : playerNames[playerNames.length-1] )
@@ -145,7 +150,8 @@ export const defaultState = {
     	name: 'Set Settlement',
     	round: 1
     },
-    currentPlayer: 'player1'
+    currentPlayer: 'player1',
+    developmentCards: initDevelopmentCards()
 };
 
 // state = buildingSlots
@@ -162,7 +168,7 @@ const buildInSpot = (state = defaultState.buildingSlots, action) => {
 
 //Set up reducers
 export const setTerrainResourceType = (state, action) => {
-	return {...state, type: action.resourceType};
+	return {...state, type: action.resourceType, hasRobber: action.resourceType === "Desert"};
 }
 
 export const setCoast = (state, action) => {
@@ -190,7 +196,14 @@ export const setSettlement = (state, action) => {
 
 	return {...state, 
 		buildingSlots: buildInSpot(state.buildingSlots, action),
-		stage: {...state.stage, name: "Set Road"}
+		stage: {...state.stage, name: "Set Road"},
+		players: {
+			...state.players,
+			[action.player]: {
+				...state.players[action.player],
+				settlements: state.players[action.player].settlements - 1
+			}
+		}
 	};
 }
 
@@ -238,37 +251,43 @@ export const setRoad = (state, action) => {
 	return {...state, 
 		buildingSlots: buildInSpot(state.buildingSlots, action),
 		currentPlayer: nextPlayer,
-		stage: stage
+		stage: stage,
+		players: {
+			...state.players,
+			[action.player]: {
+				...state.players[action.player],
+				roads: state.players[action.player].roads - 1
+			}
+		}
 	};
 }
 
-//state = terrainHex
-export const setRobber = (state, action) => {
-	return Object.assign({}, state, {hasRobber: true})
-}
 
 //Player reducers
 const reducePlayer = (state, action) => {
-	state[action.player].roads -= 1;
-	state[action.player].resourceCards.bricks -= 1;
-	state[action.player].resourceCards.lumber -= 1;
+	
+	if(action.item === 'Road'){
+		state[action.player].resourceCards.bricks -= 1;
+		state[action.player].resourceCards.lumber -= 1;
+		state[action.player].roads -= 1; 
+	}else if(action.item === 'Settlement'){
+		state[action.player].resourceCards.bricks -= 1;
+		state[action.player].resourceCards.lumber -= 1;
+		state[action.player].resourceCards.wool -= 1;
+		state[action.player].resourceCards.grain -= 1;
+		state[action.player].settlements -= 1; 
 
-	if(action.item === 'City'){
+	}else if(action.item === 'City'){
+		state[action.player].resourceCards.ore -= 3;
+		state[action.player].resourceCards.grain -= 2;
 		state[action.player].settlements += 1; 
+		state[action.player].cities -= 1; 
 	}
 
 	return Object.assign({}, state);
 }
 
 export const produceResources = (state, action, islandState) => {
-	if(!action.number){
-		return {...state, errorMessage: "You must specify the number that was rolled"}
-	}
-
-	if(action.number === 7){
-		return {...state};
-	}
-
 	const mapping = {"Hills": "bricks", "Pasture": "wool", "Forest": "lumber", "Mountains": "ore", "Fields": "grain"}
 
 	let players = {...state};
@@ -279,20 +298,21 @@ export const produceResources = (state, action, islandState) => {
 	});
 	matchedTerrainKeys.forEach((key) => {
 		let terrainHex = islandState.terrainHex[key];
-		let type = mapping[terrainHex.type];	
-		// For each slot with a settlement or city
-		terrainHex.slots.forEach((s) => {
-			let slot = islandState.buildingSlots[s.key];
-			if(slot){
-				// Add 1 or 2 resources to the owner of the settlement or city
-				if(slot.item === 'City'){
-					state[slot.owner].resourceCards[type] += 2;
-				}else if(slot.item === 'Settlement'){
-					state[slot.owner].resourceCards[type]++;
-				}	
-			}
-		});
-		
+		if(!terrainHex.hasRobber){
+			let type = mapping[terrainHex.type];	
+			// For each slot with a settlement or city
+			terrainHex.slots.forEach((s) => {
+				let slot = islandState.buildingSlots[s.key];
+				if(slot){
+					// Add 1 or 2 resources to the owner of the settlement or city
+					if(slot.item === 'City'){
+						state[slot.owner].resourceCards[type] += 2;
+					}else if(slot.item === 'Settlement'){
+						state[slot.owner].resourceCards[type]++;
+					}	
+				}
+			});	
+		}
 	})
 
 	return players;
@@ -451,17 +471,9 @@ export const buildSettlement = (state, action) => {
 }
 
 export const buildCity = (state, action) => {
-	// let adjacentSlotKeys = _getAdjacentSlots(state.terrainHex, action.slot);
-	// let adjacentSlots = adjacentSlotKeys.map((k) => {
-	// 	return state.buildingSlots[k];
-	// });
-	// let existingBuildings = adjacentSlots.filter((s) => {
-	// 	return (s.item === "Settlement" || s.item === "City") && s.owner === action.player;
-	// });
-
-	// if(existingBuildings.length === 0){
-	// 	return {...state, errorMessage: "A new road must always connect to one of your existing roads, settlements, or cities."}
-	// }
+	if(state.buildingSlots[action.slot].item !== "Settlement" || state.buildingSlots[action.slot].owner !== action.player){
+		return {...state, errorMessage: "Only an existing settlement can be upgraded to a city."}
+	}
 
 	state.buildingSlots = buildInSpot(state.buildingSlots, action);
 	
@@ -474,10 +486,6 @@ export const buildCity = (state, action) => {
 }
 
 export const build = (state = defaultState, action) => {
-	if(!action.slot){
-		return {...state, errorMessage: "You must specify a slot."};
-	}
-
 	if(!action.player){
 		return {...state, errorMessage: "You must specify a player."};
 	}
@@ -509,6 +517,10 @@ export const endTurn = (state = defaultState, action) => {
 	return {...state, currentPlayer: currentPlayer.nextPlayer, stage: {...state.stage, name: "Roll"}};
 }
 
+export const endDiscard = (state = defaultState, action) => {
+	return {...state, stage: {name: "Robber", round: 2, message: "Move the Robber"}};
+}
+
 // Development card reducers
 const emptyPlayer = {
 	settlements: 5
@@ -519,18 +531,24 @@ export const createPlayer = (state = {}, action = {}) => {
 }
 
 const catan = (state = defaultState, action = {}) => {
+	let newState;
     switch (action.type) {
         case 'SET_ITEM':
        	case 'BUILD':
-       		if(action.item === 'Settlement' && state.buildingSlots[action.slot].type !== 'Intersection') {
+	       	if(!action.slot){
+				return {...state, errorMessage: "You must specify a slot."};
+			}
+
+			let slot = state.buildingSlots[action.slot];
+       		if(action.item === 'Settlement' && slot.type !== 'Intersection') {
 				return {...state, errorMessage: "You can only build settlements on intersections."};
 			}
 
-			if(action.item === 'Road' && state.buildingSlots[action.slot].type !== 'Path') {
+			if(action.item === 'Road' && slot.type !== 'Path') {
 				return {...state, errorMessage: "You can only build roads on paths."};
 			}
 
-			if(state.buildingSlots[action.slot].item) {
+			if((action.item !== "City" && slot.item) || (action.item === "City" && slot.item === "City")) {
 				return {...state, errorMessage: "There is already something here."};
 			}
 
@@ -542,7 +560,7 @@ const catan = (state = defaultState, action = {}) => {
 					return setRoad(state, action);
        			}
        		}else if(action.type === "BUILD"){
-       			var newState = build(state, action);
+       			let newState = build(state, action);
             	return newState;
        		}
        		break;
@@ -565,12 +583,66 @@ const catan = (state = defaultState, action = {}) => {
         case 'SET_CURRENT_PLAYER':
         	return {...state, currentPlayer: action.player};
         case 'PRODUCE':
+        	if(state.stage.name !== "Roll"){
+				return {...state, errorMessage: "You cannot produce resources at the Trade stage."}
+        	}
+
+        	if(!action.number){
+				return {...state, errorMessage: "You must specify the number that was rolled"}
+			}
         	return {...state, players: produceResources(state.players, action, state), stage: {name: "Trade"}};
+        case "ACTIVATE_ROBBER":
+        	newState = {...state, stage: {name: "Robber", round: 1, message: "Discard Cards"}};
+        	Object.keys(state.players).forEach((key) => {
+        		let player = newState.players[key]; 
+        		let resourceTotal = player.resourceCards.bricks + player.resourceCards.lumber + player.resourceCards.ore + player.resourceCards.grain + player.resourceCards.wool;
+        		if(resourceTotal > 7){
+        			let half = parseInt(resourceTotal/2, 10);
+        			player.message = `Robber: You must discard ${half} cards`;
+        		}else{
+        			player.message = null;
+        		}
+        		newState.players[key] = player;
+        	})
+			return newState;        
+		case "SET_ROBBER":
+        	return {
+        		...state, 
+        		terrainHex: terrainHex(state.terrainHex, action), 
+        		stage: {...state.stage, round: 3, message: "Choose a player with a settlement or city to steal a resource"}
+        	};
+        case "DISCARD_RESOURCES":
+        	if(!(state.stage.name === "Robber" && state.stage.round === 1)){
+        		return state;
+        	}
+        	return {
+        		...state, 
+        		players: players(state.players, action)
+        	};
+
+        case "END_DISCARD":
+        	if(!(state.stage.name === "Robber" && state.stage.round === 1)){
+        		return state;
+        	}
+        	return endDiscard(state, action);
+        case "STEAL_RESOURCE":
+        	return {
+        		...state, 
+        		players: players(state.players, action), 
+        		stage: {name: "Trade", round: 1, message: "Trade or Build!"}
+        	};
+
         case "END_TURN":
         	return endTurn(state, action);
+        
+        case "BUY_DEVELOPMENT_CARD":
+        	return buyDevelopmentCard(state, action);
+        
         default:
             return state;
     }
 };
 
 export default catan;
+
+export {buyDevelopmentCard};

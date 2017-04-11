@@ -1,4 +1,4 @@
-import catan, {build} from '.';
+import catan, {build} from '..';
 
 describe('Road', () => {
     it('should only be built on paths', () => {

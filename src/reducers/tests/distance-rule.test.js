@@ -1,4 +1,4 @@
-import catan from '.';
+import catan from '..';
 
 describe('Distance Rule', () => {
     describe('A settlement', () => {

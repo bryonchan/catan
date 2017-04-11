@@ -1,4 +1,4 @@
-import {defaultState, _getAdjacentSlots, _getAdjacentSlotsOnceRemoved} from ".";
+import {defaultState, _getAdjacentSlots, _getAdjacentSlotsOnceRemoved} from "..";
 
 describe('Utilities', () => {
     describe('_getAdjacentSlots', () => {

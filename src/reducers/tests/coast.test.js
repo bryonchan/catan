@@ -1,4 +1,4 @@
-import {setCoast} from '.';
+import {setCoast} from '..';
 
 describe('Coast', () => {
 	describe('Initialise', () => {

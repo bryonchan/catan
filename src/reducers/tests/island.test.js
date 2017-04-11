@@ -1,4 +1,4 @@
-import island, {buildingSlots, terrainHex} from './island';
+import island, {buildingSlots, terrainHex} from '../island';
 
 describe('Building slots, i.e. terrain hex edges and intersections', () => {
 	var initialState; 
@@ -28,8 +28,8 @@ describe('Terrain Hex reducers', () => {
 	});
 
 	it('should contain key', () => {
-		expect(initialState["terrain1"].key).toEqual("1");
-		expect(initialState["terrain11"].key).toEqual("11");	
+		expect(initialState["terrain1"].key).toEqual("terrain1");
+		expect(initialState["terrain11"].key).toEqual("terrain11");	
 	});
 
 	describe('Terrain Hex', () => {

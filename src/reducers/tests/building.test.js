@@ -1,5 +1,5 @@
-import catan, {build, createPlayer, defaultState} from '../reducers';
-import {buildRoad} from '../actions';
+import catan, {build, createPlayer, defaultState} from '..';
+import {buildRoad} from '../../actions';
 import _ from 'lodash';
 
 describe('Build (Building)', () => {
@@ -130,9 +130,12 @@ describe('Build (Building)', () => {
 
 		describe('City building', () => {
 			let state = _.cloneDeep(initialState);
+			state.buildingSlots["11"].item = "Settlement";
+			state.buildingSlots["11"].owner = "player1";
 			var action = {type: 'BUILD', item: 'City', slot: "11", player: "player1"};
 			let newState = build(state, action);
 			it('should build a city', () => {
+				expect(newState.errorMessage).toBeUndefined();
 				expect(newState.buildingSlots["11"]).toMatchObject({
 					key: "11",
 					item: 'City'
@@ -151,7 +154,7 @@ describe('Build (Building)', () => {
 				let state = _.cloneDeep(initialState);
 				
 				var action = {type: 'BUILD', item: 'Road'};
-				let newState = build(state, action);
+				let newState = catan(state, action);
 
 				it('should require a slot to be specified', () => {
 					expect(newState).not.toBe(state);

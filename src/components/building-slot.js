@@ -1,6 +1,7 @@
 import React, { Component, PropTypes } from 'react';
 import Settlement from './settlement';
 import Road from './road';
+import City from './city';
 
 class BuildingSlot extends Component {
     static propTypes = {
@@ -11,7 +12,8 @@ class BuildingSlot extends Component {
         super(props);
         this.ItemComponents = {
             "Road": Road,
-            "Settlement": Settlement
+            "Settlement": Settlement,
+            "City": City
         }
     }
     

@@ -2,8 +2,10 @@ import React, { Component } from 'react';
 import './App.css';
 import TerrainHex from './components/terrain-hex';
 import HelpMessage from './components/help-message';
+import DevelopmentCards from './components/development-cards';
 import {connect} from 'react-redux';
-import {setRoad, roll, setResource, setColour, setSettlement, buildRoad, buildSettlement, buildCity, endTurn} from './actions';
+import {setRoad, roll, setResource, setColour, setSettlement, buildRoad, buildSettlement, buildCity, endTurn,
+buyDevelopmentCard, setRobber, stealResource, discardResources, endDiscard} from './actions';
 import Player from './components/player';
 
 const mapStateToProps = ({ terrainHex, errorMessage, buildingSlots, players, stage, currentPlayer }) => ({
@@ -38,15 +40,26 @@ export class App extends Component {
 				if(slot.type === "Intersection"){
 					if(slot.item === "Settlement"){
 						this.props.dispatch(buildCity(this.props.currentPlayer, slot.key));
-					}else{
+					}else if(!slot.item){
 						this.props.dispatch(buildSettlement(this.props.currentPlayer, slot.key));
 					}
 				}else if(slot.type === "Path"){
 					this.props.dispatch(buildRoad(this.props.currentPlayer, slot.key));
 				}
 				break;
+			case "Robber":
+				if(this.props.stage.round === 3){
+					this.props.dispatch(stealResource(this.props.currentPlayer, slot.owner, "bricks"));
+				}
+				break;
 			default:
 				break;
+		}
+	}
+
+	handleHexClick(hexKey){
+		if(this.props.stage.name === "Robber" && this.props.stage.round === 2){
+			this.props.dispatch(setRobber(hexKey));
 		}
 	}
 
@@ -78,6 +91,10 @@ export class App extends Component {
 
 	}
 
+	handleDiscard(resourceCards){
+		this.props.dispatch(discardResources(this.props.currentPlayer, resourceCards));
+	}
+
 	setup(){
 		this.props.dispatch(setSettlement("player1", "1"));
 		this.props.dispatch(setRoad("player1", "2"));
@@ -101,6 +118,14 @@ export class App extends Component {
 		this.props.dispatch(endTurn());
 	}
 
+	endDiscard(){
+		this.props.dispatch(endDiscard());
+	}
+
+	handleBuyCard(){
+		this.props.dispatch(buyDevelopmentCard(this.props.currentPlayer));
+	}
+
 	render() {
 	return (
 	  <div className="App">
@@ -108,12 +133,14 @@ export class App extends Component {
 		{this.props.errorMessage}
 		{Object.keys(this.props.terrainHex).map((key, i) => {
 		  let h = this.props.terrainHex[key];
-		  return <TerrainHex onSlotClick={this.handleSlotClick.bind(this)} className={'hex'+i} key={h.key} slots={h.slots} allSlots={this.props.buildingSlots} number={h.number} type={h.type} players={this.props.players} />
+		  return <TerrainHex hex={h} onHexClick={this.handleHexClick.bind(this)} onSlotClick={this.handleSlotClick.bind(this)} className={'hex'+i} key={h.key} slots={h.slots} allSlots={this.props.buildingSlots} number={h.number} type={h.type} players={this.props.players} hasRobber={h.hasRobber} />
 		})}
-		<Player className="player1" player={this.props.players.player1} onRoll={this.handleRoll.bind(this)} onSelectColour={this.handleSelectColour.bind(this)} />
-		<Player className="player2" player={this.props.players.player2} onRoll={this.handleRoll.bind(this)} onSelectColour={this.handleSelectColour.bind(this)} />
-		<Player className="player3" player={this.props.players.player3} onRoll={this.handleRoll.bind(this)} onSelectColour={this.handleSelectColour.bind(this)} />
+		<Player className="player1" player={this.props.players.player1} onRoll={this.handleRoll.bind(this)} onSelectColour={this.handleSelectColour.bind(this)} onDiscard={this.handleDiscard.bind(this)} />
+		<Player className="player2" player={this.props.players.player2} onRoll={this.handleRoll.bind(this)} onSelectColour={this.handleSelectColour.bind(this)} onDiscard={this.handleDiscard.bind(this)}  />
+		<Player className="player3" player={this.props.players.player3} onRoll={this.handleRoll.bind(this)} onSelectColour={this.handleSelectColour.bind(this)} onDiscard={this.handleDiscard.bind(this)}  />
 		<button onClick={this.endTurn.bind(this)}>End Turn</button>
+		<button onClick={this.endDiscard.bind(this)}>End Discard</button>
+		<DevelopmentCards onBuyCard={this.handleBuyCard.bind(this)} />
 	  </div>
 	);
 	}

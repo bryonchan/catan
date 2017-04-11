@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {buyDevelopmentCard, playDevelopmentCard} from './development-cards';
+import {buyDevelopmentCard, playDevelopmentCard} from '../development-cards';
 
 describe('Development Cards', () => {
 
@@ -22,6 +22,9 @@ describe('Development Cards', () => {
 			player1: {
 				developmentCards: {
 					"dev1": {type: 'Knight'}
+				},
+				resourceCards: {
+					ore: 2
 				}
 			},
 			player2: {
@@ -48,6 +51,7 @@ describe('Development Cards', () => {
             expect(newState).not.toBe(state);
             expect(Object.keys(newState.developmentCards).length).toEqual(3);            
             expect(Object.keys(newState.players.player1.developmentCards).length).toEqual(2);
+            expect(newState.players.player1.resourceCards.ore).toEqual(1);
 
         });
     });

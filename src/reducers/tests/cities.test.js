@@ -1,11 +1,7 @@
-import {produceResources} from '.';
+import catan, {produceResources} from '..';
 import _ from 'lodash';
 
 describe('Cities', () => {
-    // it('should be worth 2 Victory points', () => {
-    //     expect(city.victoryPoints).toEqual(2);
-    // });
-
     let islandStateDefault = {
     		buildingSlots: {
     			"16": {
@@ -147,5 +143,15 @@ describe('Cities', () => {
     	});
     });
 
+    it("should only be upgraded from a settlement", () => {
+    	let state = catan(undefined, {});
+    	state.players.player1.resourceCards = {
+    		...state.players.player1.resourceCards,
+    		ore: 3,
+    		grain: 2
+    	}
+    	let newState = catan(state, {type: "BUILD", item: "City", slot: "7", player: "player1"});
+    	expect(newState.errorMessage).toEqual("Only an existing settlement can be upgraded to a city.");
+    });
 
 });

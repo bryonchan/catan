@@ -1,4 +1,4 @@
-import catan, {setColour, setSettlement} from '.';
+import catan, {setColour, setSettlement} from '..';
 
 describe('Setup', () => {
 
@@ -95,6 +95,7 @@ describe('Setup', () => {
 		    	expect(state.buildingSlots[action.slot].item).toEqual('Settlement');
 		    	expect(state.buildingSlots[action.slot].owner).toEqual('player1');
 		    	expect(state.currentPlayer).toEqual('player1');
+		    	expect(state.players.player1.settlements).toEqual(4);
 		    });
 
 		    it('should only allow players to build roads on paths', () => {
@@ -126,6 +127,7 @@ describe('Setup', () => {
 		    	state = catan(state, action);
 		    	expect(state.buildingSlots[action.slot].item).toEqual('Road');
 		    	expect(state.buildingSlots[action.slot].owner).toEqual('player1');
+		    	expect(state.players.player1.roads).toEqual(14);
 		    });	
 		});
 	})
